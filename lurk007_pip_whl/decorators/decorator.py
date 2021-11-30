@@ -4,7 +4,7 @@ import inspect
 import os
 import threading
 import time
-
+from lurk007_pip_whl.config.conf import log_path
 from lurk007_pip_whl.os.thread.my_thread import MyThread
 from lurk007_pip_whl.time.date import Date
 
@@ -78,32 +78,12 @@ def synchronization(func):
     return lock
 
 
-def asynchronous(func):
-    """
-    在函数上方加上asynchronous就可以变成同步方法
-    :param func:
-    :return:
-    """
-
-    def lock(*args, **kwargs):
-        local.acquire()
-        local.locked()
-        try:
-            res = func(*args, **kwargs)
-            return res
-        finally:
-            local.release()
-
-    return lock
-
-
-def log(func):
+def logger(func):
     caller = inspect.stack()[1][4][0].replace("\n", "")
 
-    def logger(*args, **kwargs):
+    def run(*args, **kwargs):
         p = inspect.stack()[1][1].split('/')[-3::]
         s = ''
-        project_name = p[0]
         index = 0
         for i in p:
             if index == 0:
@@ -111,20 +91,18 @@ def log(func):
                 continue
             s += F'{i}.'
         s = s.replace('.py', '')
-        print(s)
-        cur_path = os.path.abspath(os.path.dirname(__file__))
-        root_path = cur_path[:cur_path.find("InterfaceTest_master\\") + len(
-            "InterfaceTest_master\\")] + "/" + project_name + '/logs'
+        root_path = log_path
         os.system(F'mkdir {root_path} -p')
-        print('root', root_path)
-        with open(F"{root_path}/{s}{caller}.log".replace('def ', '').replace(':', ''), 'a') as f:
+        path = F"{root_path}/{s}{caller}.log".replace('def ', '').replace(':', '')
+        print('log_path:', path)
+        with open(path, 'a') as f:
             f.write(F'[{Date.now()}]\n')
-            f.write(F"*>{*args, *kwargs}\n")
+            f.write(F"params:>{*args, *kwargs}\n")
             res = func(*args, **kwargs)
-            f.write(F"*>{res}\n\n")
+            f.write(F"return:>{res}\n\n")
         return res
 
-    return logger
+    return run
 
 
 def lissen_time(func):
@@ -155,7 +133,7 @@ def singleton(cls, *args, **kwargs):
     return _singleton
 
 
-@log
+@logger
 def main(a, b):
     print(a + b)
 

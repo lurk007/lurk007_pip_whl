@@ -1,6 +1,5 @@
 import pymysql
 from dbutils.pooled_db import PooledDB
-
 from lurk007_pip_whl.config.conf import db_pool
 
 '''
@@ -27,7 +26,7 @@ class MysqlPool(object):
             user=db_pool['user'],
             password=db_pool['password'],
             database=db_pool['database'],
-            charset=db_pool['charset']
+            charset=db_pool['charset'],
         )
 
     def __new__(cls, *args, **kw):
@@ -60,7 +59,7 @@ class MysqlPool(object):
         cursor.close()
         conn.close()
 
-    def fetch_all(self, sql, args=None):
+    def fetchall(self, sql, args=None, count=0):
         '''
         批量查询
         :param sql:
@@ -70,11 +69,15 @@ class MysqlPool(object):
         conn, cursor = self.connect()
 
         cursor.execute(sql, args)
-        record_list = cursor.fetchall()
+        if count <= 0:
+            record_list = cursor.fetchall()
+        else:
+            record_list = self.__fetch(cursor, count)
         self.close(conn, cursor)
 
         return record_list
-    def fetch_one(self, sql, args=None):
+
+    def fetchone(self, sql, args=None):
         '''
         查询单条数据
         :param sql:
@@ -87,6 +90,7 @@ class MysqlPool(object):
         self.close(conn, cursor)
 
         return result
+
     def execute(self, sql, args=None):
         '''
         插入数据
@@ -101,48 +105,68 @@ class MysqlPool(object):
         return row
 
     def is_existence(self, table_name):
-        result = self.fetch_one(" SHOW TABLES LIKE %s", (table_name,))
+        result = self.fetchone(" SHOW TABLES LIKE %s", (table_name,))
         return result
 
     def desc(self, table_name):
-        result = self.fetch_one("SELECT DATABASE() as db_name", None)
+        result = self.fetchone("SELECT DATABASE() as db_name", None)
         if result is None:
             return None
         else:
             db_name = result['db_name']
             print(db_name)
-            result = self.fetch_one(
+            result = self.fetchone(
                 "select * from information_schema.columns where table_schema = %s and table_name = %s",
                 (db_name, table_name,))
         return result
 
+    def while_do(self, target, cursor, args=(), kwargs=None, count=0):
+        """
+        对每一条数据作任意操作
+        """
+        if kwargs is None:
+            kwargs = {}
+        result = list()
+        if count == 0:
+            while True:
+                res = cursor.fetchone()
+                if res:
+                    result.append(target(res, *args, **kwargs))
+                else:
+                    break
+        else:
+            nums = range(count)
+            for i in nums:
+                res = cursor.fetchone()
+                if res:
+                    result.append(target(res, *args, **kwargs))
+                else:
+                    break
+        return result
+
+    def __fetch(self, cursor, count):
+        nums = range(count)
+        result = list()
+        for i in nums:
+            res = cursor.fetchone()
+            if res:
+                result.append(res)
+            else:
+                break
+        return result
+
+
+def test(res, a, b, c):
+    print(res)
+    print(a)
+    print(b)
+    print(c)
+    return res['id']
+
 
 if __name__ == '__main__':
     pass
-    res = MysqlPool().desc('daqian_user')
-    if res:
-        for k, v in res.items():
-            print(k, v)
-        print(res)
-    # @timer
-    # @get_pid
-    # def test(s, pool):
-    #     # res = pool.execute('insert into daqian_role_user values (null,%s,%s)', [1,2])
-    #     sql = F"select * from daqian_role_user limit 100"
-    #     res = pool.fetch_all(sql, None)
-    #     return res
-    #
-    #
-    # pool = MysqlPool()
-    # li = list()
-    # # threads = [threading.Thread(target=test, args=(li, pool)) for i in range(25000)]
-    # threads = [MyThread(target=test, args=(li, pool)) for i in range(10)]
-    # thread_values = []
-    # for i in threads:
-    #     i.start()
-    # for i in threads:
-    #     i.join()
-    #     # continue
-    #     thread_values.append(i.get_result())
-    # for i in thread_values:
-    #     print(i[0])
+    msp = MysqlPool()
+    print(msp.fetchall("select * from daqian_role_menu", count=3))
+    # result = msp.while_do(target=test, cursor=cursor, args=(1, 2, 3,))
+    # print(result)
