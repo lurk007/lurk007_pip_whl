@@ -5,7 +5,7 @@ import os
 import threading
 import time
 from lurk007_pip_whl.config.conf import log_path
-from lurk007_pip_whl.os.thread.my_thread import MyThread
+from lurk007_pip_whl.lurk_os.thread.my_thread import MyThread
 from lurk007_pip_whl.time.date import Date
 
 local = threading.Lock()
@@ -93,9 +93,9 @@ def logger(func):
         s = s.replace('.py', '')
         root_path = log_path
         os.system(F'mkdir {root_path} -p')
-        path = F"{root_path}/{s}{caller}.log".replace('def ', '').replace(':', '')
-        print('log_path:', path)
-        with open(path, 'a') as f:
+        p = F"{root_path}/{s}{caller}.log".replace('def ', '').replace(':', '')
+        print('log_path:', p)
+        with open(p, 'a') as f:
             f.write(F'[{Date.now()}]\n')
             f.write(F"params:>{*args, *kwargs}\n")
             res = func(*args, **kwargs)

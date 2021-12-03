@@ -156,17 +156,6 @@ class MysqlPool(object):
         return result
 
 
-def test(res, a, b, c):
-    print(res)
-    print(a)
-    print(b)
-    print(c)
-    return res['id']
-
-
 if __name__ == '__main__':
     pass
     msp = MysqlPool()
-    print(msp.fetchall("select * from daqian_role_menu", count=3))
-    # result = msp.while_do(target=test, cursor=cursor, args=(1, 2, 3,))
-    # print(result)
