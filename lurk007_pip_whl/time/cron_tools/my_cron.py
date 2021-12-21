@@ -9,12 +9,16 @@ class MyCron(object):
         pass
 
     def cron_iter(self, fmt, count=None):
-        itrs = croniter(fmt, self.str_time_now)
+        try:
+            itrs = croniter(fmt, self.str_time_now)
+        except Exception as e:
+            print(e)
+            raise RuntimeError("语法错误")
         time_lapses = None
         date = None
         if count:
             time_lapses = [itrs.get_next() for _ in range(count)]
-            date = [itrs.get_next(datetime) for _ in range(count)]
+            date = [str(itrs.get_next(datetime)) for _ in range(count)]
         return itrs, time_lapses, date
 
 

@@ -23,7 +23,6 @@ class Date(object):
         else:
             timeStamp = time.time()
         return int(timeStamp)
-
     @classmethod
     def all_time(cls):
         time_str = Date.now()

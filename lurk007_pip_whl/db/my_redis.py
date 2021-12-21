@@ -4,11 +4,8 @@ from lurk007_pip_whl.config.conf import redis_conf
 
 
 class Redis(object):
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def rd(host=None, port=None, password=None, db=0):
+    @classmethod
+    def rd(cls, host=None, port=None, password=None, db=0):
         if host is None:
             host = redis_conf['host']
         if port is None:

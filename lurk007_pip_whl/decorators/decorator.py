@@ -38,17 +38,18 @@ def daemon_thread(time_out=None, interval=1):
             thread = MyThread(target=func, args=args, kwargs=kwargs)
             thread.setDaemon(True)  # 守护线程
             thread.start()
-            if time_out:
+            if time_out is not None:
                 nums = range(time_out // interval)
                 for i in nums:
                     time.sleep(interval)
                     result = thread.get_result()
-                    if result:
+                    if result is not None:
                         return result
             else:
                 while True:
                     result = thread.get_result()
-                    if result:
+                    if result is not None:
+                        print(result)
                         return result
                     else:
                         time.sleep(interval)

@@ -1,7 +1,9 @@
 import pymysql
 from dbutils.pooled_db import PooledDB
+
 from lurk007_pip_whl.config.conf import db_pool
-from lurk007_pip_whl.decorators.decorator import lissen_time
+from lurk007_pip_whl.decorators.decorator import logger, lissen_time
+from lurk007_pip_whl.lurk_os.thread.my_thread import MyThread
 
 '''
 同步连接池
@@ -27,7 +29,7 @@ class MysqlPool(object):
             user=db_pool['user'],
             password=db_pool['password'],
             database=db_pool['database'],
-            charset=db_pool['charset'],
+            charset=db_pool['charset']
         )
 
     def __new__(cls, *args, **kw):
@@ -60,7 +62,7 @@ class MysqlPool(object):
         cursor.close()
         conn.close()
 
-    def fetchall(self, sql, args=None, count=0):
+    def fetch_all(self, sql, args=None):
         '''
         批量查询
         :param sql:
@@ -70,15 +72,12 @@ class MysqlPool(object):
         conn, cursor = self.connect()
 
         cursor.execute(sql, args)
-        if count <= 0:
-            record_list = cursor.fetchall()
-        else:
-            record_list = self.__fetch(cursor, count)
+        record_list = cursor.fetchall()
         self.close(conn, cursor)
 
         return record_list
 
-    def fetchone(self, sql, args=None):
+    def fetch_one(self, sql, args=None):
         '''
         查询单条数据
         :param sql:
@@ -106,74 +105,67 @@ class MysqlPool(object):
         return row
 
     def is_existence(self, table_name):
-        result = self.fetchone(" SHOW TABLES LIKE %s", (table_name,))
+        result = self.fetch_one(" SHOW TABLES LIKE %s", (table_name,))
         return result
 
     def desc(self, table_name):
-        result = self.fetchone("SELECT DATABASE() as db_name", None)
+        result = self.fetch_one("SELECT DATABASE() as db_name", None)
         if result is None:
             return None
         else:
             db_name = result['db_name']
             print(db_name)
-            result = self.fetchone(
+            result = self.fetch_one(
                 "select * from information_schema.columns where table_schema = %s and table_name = %s",
                 (db_name, table_name,))
         return result
 
-    def while_do(self, target, cursor, args=(), kwargs=None, count=0):
-        """
-        对每一条数据作任意操作
-        """
-        if kwargs is None:
-            kwargs = {}
-        result = list()
-        if count == 0:
-            while True:
-                res = cursor.fetchone()
-                if res:
-                    result.append(target(res, *args, **kwargs))
-                else:
-                    break
-        else:
-            nums = range(count)
-            for i in nums:
-                res = cursor.fetchone()
-                if res:
-                    result.append(target(res, *args, **kwargs))
-                else:
-                    break
-        return result
 
-    def __fetch(self, cursor, count):
-        nums = range(count)
-        result = list()
-        for i in nums:
-            res = cursor.fetchone()
-            if res:
-                result.append(res)
-            else:
-                break
-        return result
 @lissen_time
-def main():
-    msp = MysqlPool()
-    # res = msp.fetchall("select `id`, `periods`, `thirdparty_id`, `project_code`, `project_name`, `organization_code`, `organization_name`, `management_level`, `word_uuid`, `img_uuid`, `source_type`, `level_1`, `level_1_name`, `level_2`, `level_2_name`, `level_3`, `level_3_name`, `analysis_status`, `analysis_type`, `start_or_stop`, `result_id`, `parent_img`, `ocr_data`, `orgin_data`, `question` from ocr_check_result_202105 group by project_code")
-    res = msp.fetchall("show tables like 'daqian_user%'")
-    for i in res:
-        print(i)
-    print(len(res))
+def test1(sql, msp):
+    msp.execute(sql)
+
+
+@lissen_time
+def test2(sqls, msp):
+    for i in sqls:
+        msp.execute(i)
+
+
+def test3(threads):
+    for thread in threads:
+        thread.start()
+
 
 if __name__ == '__main__':
-    from lurk007_pip_whl.time.date import Date
-    sql = "select a.is_primary_key,a.is_enclosure,a.is_hidden,b.`name` index_name,case b.data_type when 1 then '字符串' else '数值' end as data_type,b.display_digit,c.`name` group_name,a.position,a.uuid from daqian_element_report_item as a LEFT JOIN daqian_element_index_item as b on a.index_uuid = b.`uuid` LEFT JOIN daqian_element_group as c on a.group_uuid = c.uuid where a.report_uuid='a4d01138-3eae-11ec-9ec0-7cb0c2efae42'"
-    print(sql)
-    sql = "insert into daqian_timed_task(`script_id`,`name`,`describe`,`cron`,`create_time`,`update_time`) values(1,2,2,3,%s,%s)"
+    pass
     msp = MysqlPool()
-    for i in range(10000):
-        msp.execute(sql, (Date.now(), Date.now(),))
 
-    sql = "select * from daqian_timed_task"
-    data = msp.fetchall(sql)
-    for i in data:
-        print(i)
+    sql = "insert into daqian_role_menu values"
+    for i in range(1, 9999):
+        sql += F'({i},1,2),'
+    sql += "(10000,1,2)"
+
+    sqls = []
+    for i in range(1, 10000):
+        sqls.append(F'insert into daqian_role_menu values({i},1,2)')
+
+    msp.execute('delete from daqian_role_menu')
+    res = msp.fetch_one('select count(1) from daqian_role_menu')
+    print(res)
+
+    # test1(sql, msp)
+
+    msp.execute('delete from daqian_role_menu')
+    res = msp.fetch_one('select count(1) from daqian_role_menu')
+    print(res)
+    # test2(sqls, msp)
+
+    msp.execute('delete from daqian_role_menu')
+    res = msp.fetch_one('select count(1) from daqian_role_menu')
+    print(res)
+    print('=========================================================================')
+    threads = []
+    for i in range(10):
+        threads.append(MyThread(target=test2, args=(sqls[i * 1000:1000],msp)))
+    test3(threads)
