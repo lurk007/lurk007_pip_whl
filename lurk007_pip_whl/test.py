@@ -1,5 +1,5 @@
 from lurk007_pip_whl.db.my_query import MyQuery
-from lurk007_pip_whl.db.my_redis import MyRedis
+from lurk007_pip_whl.db.my_redis import Redis
 from lurk007_pip_whl.db.mysql_pool import MysqlPool
 
 if __name__ == '__main__':
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         "d000004小于等于1 [and]" \
 
     operator = ['小于等于', '小于', '大于', '大于等于', '等于', '不等于', '为空', '不为空', 'in', '包含', '不包含', '介于']
-    r = MyRedis(host='localhost', port=6377, decode_responses=True)
+    r = Redis
     t = r.get('test')
     li = None
     result = None
@@ -30,5 +30,6 @@ if __name__ == '__main__':
         t = r.get('test')
         li = eval(t)
     if li:
-        query = MyQuery(li,operator,s)
-        query.get_result()
+        pass
+        # query = MyQuery(li,operator,s)
+        # query.get_result()

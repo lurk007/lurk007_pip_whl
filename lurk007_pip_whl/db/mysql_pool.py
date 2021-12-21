@@ -1,6 +1,7 @@
 import pymysql
 from dbutils.pooled_db import PooledDB
 from lurk007_pip_whl.config.conf import db_pool
+from lurk007_pip_whl.decorators.decorator import lissen_time
 
 '''
 同步连接池
@@ -156,6 +157,16 @@ class MysqlPool(object):
         return result
 
 
+@lissen_time
+def main():
+    msp = MysqlPool()
+    # res = msp.fetchall("select `id`, `periods`, `thirdparty_id`, `project_code`, `project_name`, `organization_code`, `organization_name`, `management_level`, `word_uuid`, `img_uuid`, `source_type`, `level_1`, `level_1_name`, `level_2`, `level_2_name`, `level_3`, `level_3_name`, `analysis_status`, `analysis_type`, `start_or_stop`, `result_id`, `parent_img`, `ocr_data`, `orgin_data`, `question` from ocr_check_result_202105 group by project_code")
+    res = msp.fetchall("show tables like 'daqian_user%'")
+    for i in res:
+        print(i)
+    print(len(res))
+
+
 if __name__ == '__main__':
     pass
-    msp = MysqlPool()
+    main()

@@ -24,6 +24,11 @@ class Date(object):
             timeStamp = time.time()
         return int(timeStamp)
 
+    @classmethod
+    def all_time(cls):
+        time_str = Date.now()
+        return time_str, Date.timestamp(time_str)
+
 
 if __name__ == '__main__':
     print(Date.timestamp())

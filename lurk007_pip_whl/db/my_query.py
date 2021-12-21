@@ -35,6 +35,7 @@ class MyQuery(object):
         """
         小于
         小于
+
         """
         for i in li:
             if i[key] < v:
