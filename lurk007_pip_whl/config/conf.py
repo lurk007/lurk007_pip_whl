@@ -14,10 +14,10 @@ db_pools = [
         'setsession': [],  # 开始会话前执行的命令列表。如：["set datestyle to ...", "set time zone ..."]
         'ping': 0,
         # ping MySQL服务端，检查是否服务可用。# 如：0 : None : never, 1 : default : whenever it is requested, 2 : when a cursor is created, 4 : when a query is executed, 7 : always
-        'host': '10.32.3.26',
-        'port': 3307,
+        'host': '10.34.8.89',
+        'port': 3306,
         'user': 'root',
-        'password': 'daqian123',
+        'password': 'Daqian#123',
         'database': 'jiangxin',
         'charset': 'utf8'
     },
@@ -62,10 +62,10 @@ db_pools = [
 ]
 redis_confs = [
     {
-        'host': '192.168.3.234',
+        'host': '10.34.8.89',
         'port': 6377,
         'db': 0,
-        'password': 123456,
+        'password': '123456',
         'socket_timeout': None,
         'socket_connect_timeout': None,
         'socket_keepalive': None,
@@ -92,5 +92,5 @@ redis_confs = [
         'retry': None
     }
 ]
-db_pool = db_pools[1]
+db_pool = db_pools[0]
 redis_conf = redis_confs[0]
