@@ -62,7 +62,7 @@ db_pools = [
 ]
 redis_confs = [
     {
-        'host': '10.34.8.89',
+        'host': '192.168.3.234',
         'port': 6377,
         'db': 0,
         'password': '123456',
@@ -92,5 +92,5 @@ redis_confs = [
         'retry': None
     }
 ]
-db_pool = db_pools[0]
+db_pool = db_pools[1]
 redis_conf = redis_confs[0]
