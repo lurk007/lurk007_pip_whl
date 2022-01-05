@@ -1,6 +1,6 @@
 import pymysql
 from dbutils.pooled_db import PooledDB
-from lurk007_pip_whl.config.conf import db_pool
+from lurk007_pip_whl.config.conf import db_pool as dbpool
 from lurk007_pip_whl.decorators.decorator import lissen_time
 
 '''
@@ -9,7 +9,9 @@ from lurk007_pip_whl.decorators.decorator import lissen_time
 
 
 class MysqlPool(object):
-    def __init__(self):
+    def __init__(self,db_pool = None):
+        if db_pool is None:
+            db_pool = dbpool
         self.POOL = PooledDB(
             creator=db_pool["creator"],  # 使用链接数据库的模块
             maxconnections=db_pool["maxconnections"],  # 连接池允许的最大连接数，0和None表示不限制连接数
@@ -115,8 +117,8 @@ class MysqlPool(object):
             return None
         else:
             db_name = result['db_name']
-            print(db_name)
-            result = self.fetchone(
+            print("数据库:",db_name)
+            result = self.fetchall(
                 "select * from information_schema.columns where table_schema = %s and table_name = %s",
                 (db_name, table_name,))
         return result
