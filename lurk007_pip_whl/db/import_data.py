@@ -8,12 +8,15 @@
 from lurk007_pip_whl.db.mysql_pool import MysqlPool
 from lurk007_pip_whl.time.date import Date
 
+
 def get_source_count(source_tb_name):
     msp = MysqlPool()
-    sql = F"select count(1) as count from {source_tb_name}"
+    sql = F"select count(1) as count from `{source_tb_name}`"
     source_count = msp.fetchone(sql).get("count")
     return source_count
-def insert_script_log(log_pid,log_script_id,target_tb_name):
+
+
+def insert_script_log(log_pid, log_script_id, target_tb_name):
     msp = MysqlPool()
     log_start_time = Date.now()
     log_status = 1
@@ -21,10 +24,14 @@ def insert_script_log(log_pid,log_script_id,target_tb_name):
     log_table_names = target_tb_name
     sql = "insert into daqian_script_log(`pid`,`start_time`,`script_id`,`status`,`is_runed`,`table_names`) values(%s,%s,%s,%s,%s,%s)"
     msp.execute(sql, (log_pid, log_start_time, log_script_id, log_status, log_is_runed, log_table_names,))
+
+
 def update_script_log(log_pid):
     msp = MysqlPool()
     sql = "update daqian_script_log set end_time = %s,status = 0 where pid = %s"
     msp.execute(sql, (Date.now(), log_pid))
+
+
 def get_source_data(tb_name, columns, limit=None):
     msp = MysqlPool()
     if limit is None:
@@ -50,7 +57,7 @@ def get_report_detail(tb_code, version_number):
     return res
 
 
-def insert_entrance_rule(msp, report_detail,version_number,bgq):
+def insert_entrance_rule(msp, report_detail, version_number, bgq):
     sql = "insert into daqian_import_data_entrance_rule(`report_id`,`code`,`name`," \
           "`version_number`,`periods_type`,`periods`,`is_main_report`,`data_table_name`," \
           "`into_database_date`,`report_uuid`,`dimension_type`) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
@@ -65,7 +72,7 @@ def insert_entrance_rule(msp, report_detail,version_number,bgq):
 
     msp.execute(sql, (
         report_id, report_code, report_name, version_number, periods_type, bgq, is_main_report, data_table_name,
-        Date.now(), report_uuid,dimension_type))
+        Date.now(), report_uuid, dimension_type))
 
 
 class SyncSourceData:

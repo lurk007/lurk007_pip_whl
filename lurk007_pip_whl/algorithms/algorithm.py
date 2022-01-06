@@ -1,6 +1,5 @@
 import hashlib
 import base64
-from lurk007_pip_whl.decorators.decorator import logger, lissen_time
 
 
 class BaseDecode(object):
@@ -235,8 +234,6 @@ class EightDiagrams(object):
         return s
 
 
-@lissen_time
-@logger
 def main():
     s = '123456'
     ed = EightDiagrams(plaintext=s, b=18)
