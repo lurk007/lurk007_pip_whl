@@ -92,10 +92,10 @@ redis_confs = [
         'retry': None
     },
     {
-        'host': '10.34.8.89',
-        'port': 6377,
+        'host': '127.0.0.1',
+        'port': 6379,
         'db': 0,
-        'password': '123456',
+        'password':None,
         'socket_timeout': None,
         'socket_connect_timeout': None,
         'socket_keepalive': None,
